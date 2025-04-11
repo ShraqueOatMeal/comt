@@ -26,7 +26,6 @@ private:
   bool power;
   double frequency;
   int volume;
-  bool muted;
   string mode; // "FM", "AM", or "BT" (Bluetooth)
   vector<double> presets;
   vector<BluetoothDevice> bluetoothDevices;
@@ -42,7 +41,7 @@ private:
 
 public:
   Radio()
-      : power(false), frequency(91.5), volume(10), muted(false), mode("FM"),
+      : power(false), frequency(91.5), volume(10), mode("FM"),
         connectedDeviceIndex(-1) {
     // Initialize with some preset stations
     presets = {88.1, 92.3, 95.5, 101.1, 107.9};
@@ -115,7 +114,6 @@ public:
 
     if (volume < 30) {
       volume++;
-      muted = false;
       cout << "Volume: " << volume << "/30\n";
     }
   }
@@ -127,18 +125,6 @@ public:
     if (volume > 0) {
       volume--;
       cout << "Volume: " << volume << "/30\n";
-    }
-  }
-
-  void toggleMute() {
-    if (!power)
-      return;
-
-    muted = !muted;
-    if (muted) {
-      cout << "Radio muted\n";
-    } else {
-      cout << "Radio unmuted - Volume: " << volume << "/30\n";
     }
   }
 
@@ -399,34 +385,26 @@ public:
 
     // Volume display
     cout << "│ Volume: ";
-    if (muted) {
-      cout << "MUTED";
-      cout << string(25, ' ') << "│\n";
-    } else {
-      cout << volume << "/30";
-      cout << string(25 - to_string(volume).length(), ' ') << "│\n";
-    }
-
+    cout << volume << "/30";
+    cout << string(25 - to_string(volume).length(), ' ') << "│\n";
     cout << "└────────────────────────────────────┘\n";
 
-    // Show "now playing" simulation if not muted
-    if (!muted) {
-      if (mode != "BT") {
-        bool knownStation = false;
-        for (const auto &station : stations) {
-          if (abs(station.frequency - frequency) < 0.1) {
-            simulatePlayback(station.genre);
-            knownStation = true;
-            break;
-          }
+    // Show "now playing" simulation
+    if (mode != "BT") {
+      bool knownStation = false;
+      for (const auto &station : stations) {
+        if (abs(station.frequency - frequency) < 0.1) {
+          simulatePlayback(station.genre);
+          knownStation = true;
+          break;
         }
-
-        if (!knownStation) {
-          cout << "▶ *static noises*\n";
-        }
-      } else if (connectedDeviceIndex >= 0) {
-        simulateBluetoothPlayback();
       }
+
+      if (!knownStation) {
+        cout << "▶ *static noises*\n";
+      }
+    } else if (connectedDeviceIndex >= 0) {
+      simulateBluetoothPlayback();
     }
   }
 
@@ -515,7 +493,6 @@ public:
     cout << "d - Tune frequency down (in radio mode)\n";
     cout << "+ - Volume up\n";
     cout << "- - Volume down\n";
-    cout << "m - Toggle mute\n";
     cout << "a - Switch between AM/FM/Bluetooth modes\n";
     cout << "s - Scan for radio stations (in radio mode)\n";
     cout << "b - Scan for Bluetooth devices\n";
@@ -568,9 +545,6 @@ int main() {
         break;
       case '-': // Volume down
         radio.volumeDown();
-        break;
-      case 'm': // Mute
-        radio.toggleMute();
         break;
       case 'a': // AM/FM/Bluetooth toggle
         radio.switchMode();
