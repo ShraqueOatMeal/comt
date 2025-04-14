@@ -26,7 +26,7 @@ private:
   bool power;
   double frequency;
   int volume;
-  string mode; // "FM", "AM", or "BT" (Bluetooth)
+  string mode; // "FM", or "BT" (Bluetooth)
   vector<double> presets;
   vector<BluetoothDevice> bluetoothDevices;
   int connectedDeviceIndex;
@@ -47,11 +47,11 @@ public:
     presets = {88.1, 92.3, 95.5, 101.1, 107.9};
 
     // Initialize simulated stations
-    stations = {
-        {88.1, "ROCK FM", "Rock"},      {90.7, "CLASSIC", "Classical"},
-        {92.3, "HITS FM", "Pop"},       {95.5, "JAZZ ST", "Jazz"},
-        {98.9, "NEWS 24", "News"},      {101.1, "COUNTRY", "Country"},
-        {103.5, "DANCE", "Electronic"}, {107.9, "OLDIES", "Classic Hits"}};
+    stations = {{88.1, "ROCK FM", "Rock"},
+                {92.3, "HITS FM", "Pop"},
+                {95.5, "JAZZ ST", "Jazz"},
+                {101.1, "COUNTRY", "Country"},
+                {107.9, "OLDIES", "Classic Hits"}};
 
     // Initialize with some potential Bluetooth devices in range
     bluetoothDevices = {
@@ -72,40 +72,6 @@ public:
     } else {
       cout << "Radio powered OFF\n";
     }
-  }
-
-  void tuneUp() {
-    if (!power || mode == "BT")
-      return;
-
-    if (mode == "FM") {
-      frequency += 0.2;
-      if (frequency > 108.0)
-        frequency = 87.9;
-    } else { // AM
-      frequency += 10;
-      if (frequency > 1700)
-        frequency = 530;
-    }
-
-    displayInfo();
-  }
-
-  void tuneDown() {
-    if (!power || mode == "BT")
-      return;
-
-    if (mode == "FM") {
-      frequency -= 0.2;
-      if (frequency < 87.9)
-        frequency = 108.0;
-    } else { // AM
-      frequency -= 10;
-      if (frequency < 530)
-        frequency = 1700;
-    }
-
-    displayInfo();
   }
 
   void volumeUp() {
@@ -133,13 +99,8 @@ public:
       return;
 
     if (mode == "FM") {
-      mode = "AM";
-      frequency = 600; // Default AM frequency
-      cout << "Switched to AM mode\n";
-    } else if (mode == "AM") {
       mode = "BT";
       cout << "Switched to Bluetooth mode\n";
-
       if (connectedDeviceIndex >= 0) {
         cout << "Connected to: " << bluetoothDevices[connectedDeviceIndex].name
              << "\n";
@@ -155,61 +116,12 @@ public:
     displayInfo();
   }
 
-  void savePreset(int position) {
-    if (!power || position < 1 || position > 5 || mode == "BT")
-      return;
-
-    presets[position - 1] = frequency;
-    cout << "Saved current frequency to preset " << position << "\n";
-  }
-
   void loadPreset(int position) {
     if (!power || position < 1 || position > 5 || mode == "BT")
       return;
 
     frequency = presets[position - 1];
     cout << "Loaded preset " << position << ": ";
-    displayInfo();
-  }
-
-  void scan() {
-    if (!power || mode == "BT")
-      return;
-
-    cout << "Scanning for stations...\n";
-
-    // Simulate scanning through frequencies
-    for (int i = 0; i < 10; i++) {
-      if (mode == "FM") {
-        frequency = 87.9 + (rand() % 201) * 0.1;
-      } else {
-        frequency = 530 + (rand() % 118) * 10;
-      }
-
-      cout << "Scanning: " << fixed << setprecision(1);
-      if (mode == "FM") {
-        cout << frequency << " " << mode;
-      } else {
-        cout << static_cast<int>(frequency) << " " << mode;
-      }
-
-      cout << "... ";
-      cout.flush();
-
-      this_thread::sleep_for(chrono::milliseconds(300));
-
-      if (i % 3 == 0) {
-        cout << "Station found!\n";
-      } else {
-        cout << "No station\n";
-      }
-    }
-
-    // End on a station
-    int stationIndex = rand() % stations.size();
-    frequency = stations[stationIndex].frequency;
-
-    cout << "Scan complete. Tuned to: ";
     displayInfo();
   }
 
@@ -286,15 +198,10 @@ public:
         cout << "\n";
       }
 
-      // 80% chance of successful connection
-      if (rand() % 100 < 80) {
-        connectedDeviceIndex = deviceId;
-        bluetoothDevices[deviceId].paired = true;
-        cout << "Successfully connected to " << bluetoothDevices[deviceId].name
-             << "\n";
-      } else {
-        cout << "Connection failed. Please try again.\n";
-      }
+      connectedDeviceIndex = deviceId;
+      bluetoothDevices[deviceId].paired = true;
+      cout << "Successfully connected to " << bluetoothDevices[deviceId].name
+           << "\n";
     } else {
       cout << "Invalid device ID\n";
     }
@@ -324,11 +231,9 @@ public:
     cout << "┌────────────────────────────────────┐\n";
     cout << "│ ";
 
-    if (mode == "FM" || mode == "AM") {
+    if (mode == "FM") {
       if (mode == "FM") {
         cout << fixed << setprecision(1) << frequency << " " << mode;
-      } else { // AM
-        cout << static_cast<int>(frequency) << " " << mode;
       }
     } else { // Bluetooth
       cout << "Bluetooth";
@@ -485,27 +390,6 @@ public:
 
     cout << "▶ Bluetooth playing: " << song << " from " << artist << "\n";
   }
-
-  void displayHelp() {
-    cout << "\n=== RADIO CONTROLS ===\n";
-    cout << "p - Toggle Power ON/OFF\n";
-    cout << "u - Tune frequency up (in radio mode)\n";
-    cout << "d - Tune frequency down (in radio mode)\n";
-    cout << "+ - Volume up\n";
-    cout << "- - Volume down\n";
-    cout << "a - Switch between AM/FM/Bluetooth modes\n";
-    cout << "s - Scan for radio stations (in radio mode)\n";
-    cout << "b - Scan for Bluetooth devices\n";
-    cout << "c# - Connect to Bluetooth device number # (e.g., c1 for first "
-            "device)\n";
-    cout << "x - Disconnect current Bluetooth device\n";
-    cout << "1-5 - Load preset (in radio mode)\n";
-    cout
-        << "! @ # $ % - Save current frequency to preset 1-5 (in radio mode)\n";
-    cout << "i - Display current station/device info\n";
-    cout << "h - Display this help\n";
-    cout << "q - Quit\n";
-  }
 };
 
 // Function to simulate terminal input handling
@@ -522,7 +406,6 @@ int main() {
   string input;
 
   cout << "Terminal Radio Simulator\n";
-  cout << "Type 'h' for help with controls\n";
 
   while (running) {
     cout << "\nEnter command: ";
@@ -534,23 +417,14 @@ int main() {
       case 'p': // Power
         radio.togglePower();
         break;
-      case 'u': // Up (simulating up arrow)
-        radio.tuneUp();
-        break;
-      case 'd': // Down (simulating down arrow)
-        radio.tuneDown();
-        break;
       case '+': // Volume up
         radio.volumeUp();
         break;
       case '-': // Volume down
         radio.volumeDown();
         break;
-      case 'a': // AM/FM/Bluetooth toggle
+      case 'a': // FM/Bluetooth toggle
         radio.switchMode();
-        break;
-      case 's': // Scan radio
-        radio.scan();
         break;
       case 'b': // Scan Bluetooth
         radio.scanBluetooth();
@@ -565,33 +439,12 @@ int main() {
       case '5': // Presets
         radio.loadPreset(cmd - '0');
         break;
-      case '!': // Save to preset 1
-        radio.savePreset(1);
-        break;
-      case '@': // Save to preset 2
-        radio.savePreset(2);
-        break;
-      case '#': // Save to preset 3
-        radio.savePreset(3);
-        break;
-      case '$': // Save to preset 4
-        radio.savePreset(4);
-        break;
-      case '%': // Save to preset 5
-        radio.savePreset(5);
-        break;
-      case 'i': // Info
-        radio.displayInfo();
-        break;
-      case 'h': // Help
-        radio.displayHelp();
-        break;
       case 'q': // Quit
         running = false;
         cout << "Exiting radio simulator. Goodbye!\n";
         break;
       default:
-        cout << "Unknown command. Type 'h' for help.\n";
+        cout << "Unknown command..\n";
       }
     } else if (input.length() >= 2 && input[0] == 'c') {
       // Connect to Bluetooth device command
@@ -603,7 +456,7 @@ int main() {
                 "number.\n";
       }
     } else {
-      cout << "Unknown command. Type 'h' for help.\n";
+      cout << "Unknown command.\n";
     }
   }
 
