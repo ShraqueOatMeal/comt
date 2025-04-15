@@ -44,14 +44,12 @@ public:
       : power(false), frequency(88.1), volume(10), mode("FM"),
         connectedDeviceIndex(-1) {
     // Initialize with some preset stations
-    presets = {88.1, 92.3, 95.5, 101.1, 107.9};
+    presets = {88.1, 92.3, 95.5};
 
     // Initialize simulated stations
     stations = {{88.1, "ROCK FM", "Rock"},
                 {92.3, "HITS FM", "Pop"},
-                {95.5, "JAZZ ST", "Jazz"},
-                {101.1, "COUNTRY", "Country"},
-                {107.9, "OLDIES", "Classic Hits"}};
+                {95.5, "JAZZ ST", "Jazz"}};
 
     // Initialize with some potential Bluetooth devices in range
     bluetoothDevices = {
@@ -435,8 +433,6 @@ int main() {
       case '1':
       case '2':
       case '3':
-      case '4':
-      case '5': // Presets
         radio.loadPreset(cmd - '0');
         break;
       case 'q': // Quit
