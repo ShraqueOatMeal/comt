@@ -73,7 +73,7 @@ public:
   }
 
   void volumeUp() {
-    if (!power)
+    if (!power || (mode == "BT" && connectedDeviceIndex < 0))
       return;
 
     if (volume < 30) {
@@ -83,7 +83,7 @@ public:
   }
 
   void volumeDown() {
-    if (!power)
+    if (!power || (mode == "BT" && connectedDeviceIndex < 0))
       return;
 
     if (volume > 0) {
@@ -107,7 +107,7 @@ public:
       }
     } else { // BT
       mode = "FM";
-      frequency = 91.5; // Default FM frequency
+      frequency = 88.1; // Default FM frequency
       cout << "Switched to FM mode\n";
     }
 
@@ -440,7 +440,7 @@ int main() {
         cout << "Exiting radio simulator. Goodbye!\n";
         break;
       default:
-        cout << "Unknown command..\n";
+        cout << "Unknown command.\n";
       }
     } else if (input.length() >= 2 && input[0] == 'c') {
       // Connect to Bluetooth device command
