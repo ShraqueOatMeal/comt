@@ -437,10 +437,6 @@ int main() {
       case '3':
         radio.loadPreset(cmd - '0');
         break;
-      // case 'q': // Quit
-      //   running = false;
-      //   cout << "Exiting radio simulator. Goodbye!\n";
-      //   break;
       default:
         cout << "Unknown command.\n";
       }
