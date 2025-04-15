@@ -41,7 +41,7 @@ private:
 
 public:
   Radio()
-      : power(false), frequency(91.5), volume(10), mode("FM"),
+      : power(false), frequency(88.1), volume(10), mode("FM"),
         connectedDeviceIndex(-1) {
     // Initialize with some preset stations
     presets = {88.1, 92.3, 95.5, 101.1, 107.9};
