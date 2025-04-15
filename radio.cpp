@@ -62,6 +62,8 @@ public:
     srand(time(nullptr));
   }
 
+  bool getPower() { return this->power; }
+
   void togglePower() {
     power = !power;
     if (power) {
@@ -409,7 +411,7 @@ int main() {
     cout << "\nEnter command: ";
     input = getInput();
 
-    if (input.length() == 1) {
+    if (input.length() == 1 && input != "q") {
       char cmd = input[0];
       switch (cmd) {
       case 'p': // Power
@@ -435,10 +437,10 @@ int main() {
       case '3':
         radio.loadPreset(cmd - '0');
         break;
-      case 'q': // Quit
-        running = false;
-        cout << "Exiting radio simulator. Goodbye!\n";
-        break;
+      // case 'q': // Quit
+      //   running = false;
+      //   cout << "Exiting radio simulator. Goodbye!\n";
+      //   break;
       default:
         cout << "Unknown command.\n";
       }
@@ -451,6 +453,9 @@ int main() {
         cout << "Invalid device ID. Use format 'c#' where # is the device "
                 "number.\n";
       }
+    } else if (input == "q" && !radio.getPower()) {
+      cout << "Exiting radio simulator. Goodbye!\n";
+      break;
     } else {
       cout << "Unknown command.\n";
     }
