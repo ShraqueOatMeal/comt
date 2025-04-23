@@ -95,8 +95,10 @@ public:
   }
 
   void switchMode() {
-    if (!power)
+    if (!power || connectedDeviceIndex >= 0) {
+      cout << "Please disconnect from a Bluetooth device first\n";
       return;
+    }
 
     if (mode == "FM") {
       mode = "BT";
@@ -126,8 +128,10 @@ public:
   }
 
   void scanBluetooth() {
-    if (!power)
+    if (!power || mode != "BT") {
+      cout << "Please switch to Bluetooth mode first\n";
       return;
+    }
 
     cout << "Scanning for Bluetooth devices...\n";
 
